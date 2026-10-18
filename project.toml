@@ -1,0 +1,6 @@
+[project]
+name = "proyecto-ci5652"
+version = "0.1"
+
+[tool.setuptools]
+packages = ["common", "assignment_1"]

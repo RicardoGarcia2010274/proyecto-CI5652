@@ -8,18 +8,21 @@ class Graph:
     num_vertices: int
     adj_list: dict[int, set[int]] = field(default_factory=dict)
 
-    def add_edge(self, u, v):
+    def add_edge(self, u, v)-> None:
         """Añade una arista no dirigida entre los vértices u y v."""
+        if v == u: 
+            return 
+
         self.adj_list.setdefault(u, set()).add(v)
         self.adj_list.setdefault(v, set()).add(u)
 
-    def add_vertex(self, v):
+    def add_vertex(self, v) -> None:
         """Añade un vértice al grafo."""
         if v not in self.adj_list:
             self.adj_list[v] = set()
             self.num_vertices += 1
     
-    def delete_vertex(self, v):
+    def delete_vertex(self, v) -> None:
         """Elimina un vértice y todas sus aristas del grafo."""
         if v in self.adj_list:
             for neighbor in self.adj_list[v]:
