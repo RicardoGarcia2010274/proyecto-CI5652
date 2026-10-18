@@ -4,7 +4,8 @@ import time
 from common.loader import load_dimacs_col
 # from assignment_1.backtracking import backtracking
 from assignment_1.dsatur import dSatur_alt
-
+from assignment_1.local_search import ils
+from assignment_1.local_search_ia import ils_mejorada
 
 def run_benchmark(func, instance, runs=20):
     """Mide el tiempo promedio de ejecución de un algoritmo."""
@@ -27,6 +28,8 @@ def run_dimacs_benchmark(file_path: str, known_optimal_k: int):
     solvers = [
         ("DSatur", dSatur_alt),
         # ("Backtrackinng", backtracking),
+        ("ils", ils),
+        ("ils_ia", ils_mejorada)
     ]
 
     for name, solver_func in solvers:
@@ -50,4 +53,4 @@ if __name__ == "__main__":
 
     run_dimacs_benchmark("data/le450_25c.col", known_optimal_k=25)
     run_dimacs_benchmark("data/le450_25d.col", known_optimal_k=25)
-    
+
