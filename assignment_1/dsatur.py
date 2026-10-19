@@ -2,7 +2,7 @@ from common.representation import Graph
 
 __all__ = ["Graph"]
 
-def dSatur(graph: Graph) -> dict:
+def dSatur_alt(graph: Graph) -> dict:
     """Implementación propia de la heurística de DSatur para colorear un grafo."""
     # Empieza sin colores y con saturación 0 en todos los vértices
     colors = {}
@@ -50,7 +50,7 @@ def dSatur(graph: Graph) -> dict:
 
     return colors
 
-def dSatur_alt(graph: Graph) -> dict:
+def dSatur(graph: Graph) -> dict:
     """Implementación de la IA de la heurística de DSatur."""
     # Inicialización de los colores y saturación
     colors = {}
