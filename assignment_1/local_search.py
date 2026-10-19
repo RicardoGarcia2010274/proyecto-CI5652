@@ -22,21 +22,23 @@ def local_search(grafo: Graph, solucion: dict | None) -> dict:
     siempre que la solucion vista sea mejor que la solucion actual
     """
 
-
-
     #si no me dan una solucion inicial, la creamos con Dsatur, en caso de que me la den uso esa
     if solucion is None: 
-        mejor_actual = dSatur_alt(CombinatorialSpace(grafo).grafo)
+        mejor_actual = dict(dSatur_alt(grafo))
     else:
-        mejor_actual = solucion
+        mejor_actual = dict(solucion)
  
     # Aqui calculamos los vecinos del mejor actual
-    vecinos = CombinatorialSpace(grafo).get_neighbors(mejor_actual)
+    espacio = CombinatorialSpace(grafo)
+    vecinos = espacio.get_neighbors(mejor_actual)
 
     #De todos los vecinos, vemos si hay alguna solucion mejor
-    for element in vecinos: 
-        if funcion_evaluacion(element) < funcion_evaluacion(mejor_actual):
-            mejor_actual = element
+    mejor_eval = funcion_evaluacion(mejor_actual)
+    for vecino in vecinos:
+        eval_vecino = funcion_evaluacion(vecino)
+        if eval_vecino < mejor_eval:
+            mejor_actual = vecino
+            mejor_eval = eval_vecino
     
     #NOTE: el criterio para elegir si una solucion es mejor que otra es simplemente
     # ver si la solucion que proponemos usa menos colores que la solucion anterior y ya

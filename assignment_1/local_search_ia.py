@@ -138,7 +138,7 @@ def _arranque(grafo: Graph, color: dict, k: int) -> dict:
         nuevo[v] = random.choice([c for c in range(k) if cuenta[c] == minimo])
     return nuevo
 
-def ils_mejorada(grafo: Graph, limite_seg: float = 30.0, iter_por_k: int = 10**9,
+def ils_mejorada(grafo: Graph, limite_seg: float = 30.0, iter_por_k: int = 10**4,
                  paciencia: int = 50, semilla: int | None = None) -> dict:
     if semilla is not None:
         random.seed(semilla)
