@@ -15,7 +15,7 @@ def funcion_evaluacion(solucion: dict) -> tuple:
     tamanos = Counter(solucion.values())
     return (len(tamanos), -sum(t * t for t in tamanos.values()))
 
-def local_search(grafo: Graph, solucion: dict | None) -> dict:
+def local_search(grafo: Graph, solucion: dict | None = None) -> dict:
 
     """
     Algoritmo de busqueda local que escoge una solucion como mejor 

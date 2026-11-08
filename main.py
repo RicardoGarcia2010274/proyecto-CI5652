@@ -9,6 +9,8 @@ from assignment_1.dsatur import dSatur_alt
 from assignment_1.local_search import ils
 from assignment_1.local_search_ia import ils_mejorada
 from assignment_1.local_search import local_search
+from assignment_2.local_search_specialized_ia import tabu_search_ia, simulated_annealing_ia
+from assignment_2.local_search_specialized import tabu_search, simulated_annealing
 
 def run_benchmark(func, instance, runs=20):
     """Mide el tiempo promedio de ejecución de un algoritmo."""
@@ -64,7 +66,11 @@ def run_dimacs_benchmark(file_path: str, known_optimal_k: int, timeout_seconds: 
         #("Backtracking", backtracking),
         ("Búsqueda local", local_search),
         ("ils", ils),
-        ("ils_ia", ils_mejorada)
+        ("ils_ia", ils_mejorada), 
+        ("busqueda tabu con ia", tabu_search_ia), 
+        ("busqueda tabu", tabu_search),
+        ("recocido simulado con ia", simulated_annealing_ia),
+        ("recocido simulado", simulated_annealing), 
     ]
 
     for name, solver_func in solvers:
@@ -75,11 +81,11 @@ def run_dimacs_benchmark(file_path: str, known_optimal_k: int, timeout_seconds: 
         elapsed_ms = (time.perf_counter_ns() - start_time) / 1e6
 
         if timed_out:
-            print(f"❌ TIMEOUT (Excedió {timeout_seconds}s)")
+            print(f" TIMEOUT (Excedió {timeout_seconds}s)")
         else:
             # Calcular el K obtenido (máximo color usado + 1)
             achieved_k = max(color_mapping.values()) + 1 if color_mapping else 0
-            print(f"✅ K obtenido: {achieved_k} | Tiempo: {elapsed_ms:.4f} ms")
+            print(f" K obtenido: {achieved_k} | Tiempo: {elapsed_ms:.4f} ms")
 
 if __name__ == "__main__":
 
