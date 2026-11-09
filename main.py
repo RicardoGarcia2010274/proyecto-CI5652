@@ -11,6 +11,7 @@ from assignment_1.local_search_ia import ils_mejorada
 from assignment_1.local_search import local_search
 from assignment_2.local_search_specialized_ia import tabu_search_ia, simulated_annealing_ia
 from assignment_2.local_search_specialized import tabu_search, simulated_annealing
+from assignment_2.grasp import grasp
 
 def run_benchmark(func, instance, runs=20):
     """Mide el tiempo promedio de ejecución de un algoritmo."""
@@ -71,6 +72,7 @@ def run_dimacs_benchmark(file_path: str, known_optimal_k: int, timeout_seconds: 
         ("busqueda tabu", tabu_search),
         ("recocido simulado con ia", simulated_annealing_ia),
         ("recocido simulado", simulated_annealing), 
+        ("grasp", grasp),
     ]
 
     for name, solver_func in solvers:
