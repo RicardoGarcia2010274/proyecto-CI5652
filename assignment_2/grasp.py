@@ -51,42 +51,54 @@ def _construccion_voraz_aleatorizada(
 
 
 def _mejora_local(grafo: Graph, color: dict[int, int], rng: random.Random) -> dict[int, int]:
-    """Mueve vertices a clases existentes sin crear conflictos."""
+    """Mueve vértices a clases existentes usando First-Improvement para mayor velocidad."""
     mejorada = color.copy()
     tamanos: Counter[int] = Counter(mejorada.values())
+    vertices = list(mejorada.keys())
 
-    while True:
-        mejor_delta = (0, 0)
-        movimientos: list[tuple[int, int]] = []
-
-        for v, color_actual in mejorada.items():
+    mejora_encontrada = True
+    while mejora_encontrada:
+        mejora_encontrada = False
+        
+        # Barajar los vértices para explorar de forma estocástica
+        rng.shuffle(vertices)
+        
+        for v in vertices:
+            color_actual = mejorada[v]
             prohibidos = {mejorada[w] for w in grafo.adj_list[v]}
             tam_actual = tamanos[color_actual]
-            for color_nuevo, tam_nuevo in tamanos.items():
+            
+            # Obtener y barajar los colores disponibles
+            colores_disponibles = list(tamanos.keys())
+            rng.shuffle(colores_disponibles)
+            
+            movimiento_realizado = False
+            for color_nuevo in colores_disponibles:
                 if color_nuevo == color_actual or color_nuevo in prohibidos:
                     continue
 
+                tam_nuevo = tamanos[color_nuevo]
                 delta = (
                     -1 if tam_actual == 1 else 0,
                     -(2 * (tam_nuevo - tam_actual) + 2),
                 )
-                if delta < mejor_delta:
-                    mejor_delta = delta
-                    movimientos = [(v, color_nuevo)]
-                elif delta == mejor_delta:
-                    movimientos.append((v, color_nuevo))
-
-        if not movimientos:
-            return mejorada
-
-        v, color_nuevo = rng.choice(movimientos)
-        color_actual = mejorada[v]
-        mejorada[v] = color_nuevo
-        tamanos[color_actual] -= 1
-        if tamanos[color_actual] == 0:
-            del tamanos[color_actual]
-        tamanos[color_nuevo] += 1
-
+                
+                # En cuanto encontramos una mejora estricta (delta < (0, 0)), la aplicamos
+                if delta < (0, 0):
+                    mejorada[v] = color_nuevo
+                    tamanos[color_actual] -= 1
+                    if tamanos[color_actual] == 0:
+                        del tamanos[color_actual]
+                    tamanos[color_nuevo] += 1
+                    
+                    mejora_encontrada = True
+                    movimiento_realizado = True
+                    break  # Rompe el bucle de colores
+                    
+            if movimiento_realizado:
+                break  # Rompe el bucle de vértices para reiniciar la búsqueda con el estado actualizado
+                
+    return mejorada
 
 def funcion_evaluacion(color: dict[int, int]) -> tuple[int, int]:
     """Prioriza menos colores y, en empate, clases de color mas concentradas."""
@@ -96,7 +108,7 @@ def funcion_evaluacion(color: dict[int, int]) -> tuple[int, int]:
 
 def grasp(
     grafo: Graph,
-    max_iter: int = 100,
+    max_iter: int = 40,
     alpha: float = 0.2,
     semilla: int | None = None,
 ) -> dict[int, int]:
