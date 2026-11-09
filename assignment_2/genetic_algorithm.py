@@ -34,6 +34,39 @@ def create_individual(vertices: list[int], k: int) -> Individual:
     return {v: random.randint(0, k - 1) for v in vertices}
 
 def initialize_population(graph: Graph, population_size: int, k: int) -> list[Individual]:
-    """Genera una población inicial de tamaño `population_size`."""
+    """Genera una población inicial."""
     vertices = sorted(list(graph.adj_list.keys()))
     return [create_individual(vertices, k) for _ in range(population_size)]
+
+def uniform_crossover(parent1: Individual, parent2: Individual, vertices: list[int]) -> Individual:
+    """Cruce uniforme: cada color se hereda de uno de los padres con 50% de probabilidad."""
+    child = {}
+    for v in vertices:
+        child[v] = parent1[v] if random.random() < 0.5 else parent2[v]
+    return child
+
+def mutate(individual: Individual, vertices: list[int], k: int, mutation_rate: float) -> Individual:
+    mutated = individual.copy()
+    for v in vertices:
+        if random.random() < mutation_rate:
+            mutated[v] = random.randint(0, k - 1)
+    return mutated
+
+def genetic_algorithm_gcp(
+    graph: Graph, k: int, 
+    pop_size: int = 100, 
+    max_generations: int = 500, 
+    mutation_rate: float = 0.05
+    ) -> tuple[Individual, int]:
+
+    population <- initialize_population(graph)
+
+    # for generation in range(max_generations):
+    #     Padres <- seleccionarPadres(Población)
+    #     Hijos <- recombinar(Padres)
+    #     Hijos <- mutar(Hijos)
+    #     Población <- seleccionarSobreviviente(Población, Hijos)
+    # retornar decodificar(mejor individuo en Población)
+
+
+
