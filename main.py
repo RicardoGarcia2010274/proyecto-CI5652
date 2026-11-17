@@ -12,6 +12,9 @@ from assignment_1.local_search import local_search
 from assignment_2.local_search_specialized_ia import tabu_search_ia, simulated_annealing_ia
 from assignment_2.local_search_specialized import tabu_search, simulated_annealing
 from assignment_2.grasp import grasp
+from assignment_2.genetic_algorithm import gen_gcp_binary_search
+
+TIMEOUT = 600
 
 def run_benchmark(func, instance, runs=20):
     """Mide el tiempo promedio de ejecución de un algoritmo."""
