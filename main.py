@@ -1,6 +1,8 @@
 import time
 import concurrent.futures
 import multiprocessing
+import math
+import statistics
 
 # Importa los modulos
 from common.loader import load_dimacs_col
@@ -43,7 +45,7 @@ def _run_with_timeout(solver_func, graph, timeout_seconds):
     p.join(timeout=timeout_seconds)
     
     if p.is_alive():
-        # Si sigue vivo tras el timeout, lo matamos de inmediato para que no se guise el programa
+        # Si sigue vivo tras el timeout, se termina para evitar congelar el programa
         p.terminate()
         p.join()
         return None, True  # TIMEOUT
@@ -57,8 +59,12 @@ def _run_with_timeout(solver_func, graph, timeout_seconds):
         
     return result, False
 
-def run_dimacs_benchmark(file_path: str, known_optimal_k: int, timeout_seconds: float = 100.0):
-    """Mide el tiempo de ejecución de cada algoritmo, el K resultante y gestiona timeouts."""
+def run_dimacs_benchmark(
+    file_path: str, known_optimal_k: int, timeout_seconds: float = 100.0, 
+    n_executions: int = 10):
+    """
+    Mide el tiempo de ejecución de cada algoritmo, el K resultante y gestiona timeouts.
+    """
     print(f"\n--- Analizando archivo: {file_path} (Óptimo conocido K={known_optimal_k}) ---")
     
     # Carga el grafo DIMACS
@@ -69,28 +75,53 @@ def run_dimacs_benchmark(file_path: str, known_optimal_k: int, timeout_seconds: 
         ("DSatur", dSatur_alt),
         #("Backtracking", backtracking),
         ("Búsqueda local", local_search),
-        ("ils", ils),
-        ("ils_ia", ils_mejorada), 
-        ("busqueda tabu con ia", tabu_search_ia), 
-        ("busqueda tabu", tabu_search),
-        ("recocido simulado con ia", simulated_annealing_ia),
-        ("recocido simulado", simulated_annealing), 
-        ("grasp", grasp),
+        # ("ils", ils),
+        # ("ils_ia", ils_mejorada), 
+        # ("busqueda tabu con ia", tabu_search_ia), 
+        # ("busqueda tabu", tabu_search),
+        # ("recocido simulado con ia", simulated_annealing_ia),
+        # ("recocido simulado", simulated_annealing), 
+        # ("grasp", grasp),
     ]
 
     for name, solver_func in solvers:
-        print(f"Ejecutando [{name}] (Límite: {timeout_seconds}s)...", end=" ", flush=True)
-        
-        start_time = time.perf_counter_ns()
-        color_mapping, timed_out = _run_with_timeout(solver_func, graph, timeout_seconds)
-        elapsed_ms = (time.perf_counter_ns() - start_time) / 1e6
+        best_k = math.inf
+        obtained_k = []
+        execution_times = []
+        timeouts_count = 0
 
-        if timed_out:
-            print(f" TIMEOUT (Excedió {timeout_seconds}s)")
+        # Si es un algoritmo determinista, no hacemos varias ejecuciones
+        n_runs = 1 if name == "DSatur" else n_executions
+
+        for i in range(0, n_runs):
+            start_time = time.perf_counter_ns()
+            color_mapping, timed_out = _run_with_timeout(solver_func, graph, timeout_seconds)
+            elapsed_ms = (time.perf_counter_ns() - start_time) / 1e6
+
+            if timed_out:
+                timeouts_count += 1
+                if color_mapping:
+                    # Calcular el K obtenido (máximo color usado + 1) si es que hay una solución válida
+                    achieved_k = max(color_mapping.values()) + 1
+                    obtained_k.append(achieved_k)
+                # Los tiempos de ejecución están en ms, así que multiplicamos
+                execution_times.append(timeout_seconds * 1000.0)
+
+            else:
+                # Calcular el K obtenido (máximo color usado + 1)
+                achieved_k = max(color_mapping.values()) + 1 if color_mapping else 0
+                obtained_k.append(achieved_k)
+                execution_times.append(elapsed_ms)
+
+        if obtained_k:
+            best_k = min(obtained_k)
+            prom_k = statistics.mean(obtained_k)
+            prom_t = statistics.mean(execution_times)
+            gap = ((best_k - known_optimal_k) / known_optimal_k) * 100
+            print(f"  -> [Resultados {name}] Mejor K: {best_k} | Promedio K: {prom_k:.2f} | T_prom: {prom_t:.2f} ms | Gap: {gap:.1f}% | Timeouts: {timeouts_count}/{n_runs}")
         else:
-            # Calcular el K obtenido (máximo color usado + 1)
-            achieved_k = max(color_mapping.values()) + 1 if color_mapping else 0
-            print(f" K obtenido: {achieved_k} | Tiempo: {elapsed_ms:.4f} ms")
+            print(f"  -> [Resultados {name}] TODAS las ejecuciones hicieron TIMEOUT.")
+
 
 if __name__ == "__main__":
 
